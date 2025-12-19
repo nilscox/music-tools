@@ -6,6 +6,7 @@ export default defineConfig({
   build: {
     outDir: 'lib',
     emptyOutDir: true,
+    sourcemap: true,
     lib: {
       formats: ['es'],
       entry: {
