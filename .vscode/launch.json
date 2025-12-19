@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--experimental-strip-types", "--test", "--experimental-test-isolation=none", "src/**/*.spec.ts"],
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

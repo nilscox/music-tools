@@ -1,0 +1,37 @@
+{
+  "name": "@nilscox/music-tools",
+  "description": "Utilities for music stuff",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.15.0",
+  "type": "module",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": "github:nilscox/music-tools",
+  "engines": {
+    "node": "25"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test --experimental-test-isolation=none",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "^25.0.3",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true,
+    "plugins": [
+      "@trivago/prettier-plugin-sort-imports"
+    ],
+    "importOrder": [
+      "<THIRD_PARTY_MODULES>",
+      "^src/",
+      "^\\."
+    ],
+    "importOrderSeparation": true,
+    "importOrderSideEffects": false
+  }
+}

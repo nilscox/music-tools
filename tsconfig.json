@@ -1,0 +1,20 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "module": "nodenext",
+    "target": "es2022",
+    "outDir": "lib",
+    "declaration": true,
+    "sourceMap": true,
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node16",
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
