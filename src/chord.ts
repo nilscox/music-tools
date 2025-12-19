@@ -1,7 +1,26 @@
-import chordsRef from './chords.json' with { type: 'json' };
 import { Interval, type IntervalQuality } from './interval.ts';
 import { Note } from './note.ts';
 import { assert } from './utils.ts';
+
+// prettier-ignore
+const chordsRef = {
+  'M':        ['P1', 'M3', 'P5'],
+  'm':        ['P1', 'm3', 'P5'],
+  'dim':      ['P1', 'm3', 'd5'],
+  'aug':      ['P1', 'M3', 'A5'],
+  'sus2':     ['P1', 'M2', 'P5'],
+  'sus4':     ['P1', 'P4', 'P5'],
+  '7':        ['P1', 'M3', 'P5', 'm7'],
+  'maj7':     ['P1', 'M3', 'P5', 'M7'],
+  'm7':       ['P1', 'm3', 'P5', 'm7'],
+  'm(maj7)':  ['P1', 'm3', 'P5', 'M7'],
+  'm7b5':     ['P1', 'm3', 'd5', 'm7'],
+  'dim7':     ['P1', 'm3', 'd5', 'd7'],
+  'aug7':     ['P1', 'M3', 'A5', 'm7'],
+  'maj7(#5)': ['P1', 'M3', 'A5', 'M7'],
+  '7(b5)':    ['P1', 'M3', 'd5', 'm7'],
+  'maj7(b5)': ['P1', 'M3', 'd5', 'M7']
+}
 
 export type ChordQuality = keyof typeof chordsRef;
 
