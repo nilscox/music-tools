@@ -182,9 +182,18 @@ describe('Chord', () => {
       assert.strictEqual(new Chord(C, [P1, M2, M3]).toString(), 'C(?)');
     });
 
+    test('altered root keeps its accidental', () => {
+      assert.strictEqual(new Chord(Csharp, [P1, m3, P5]).toString(), 'C#m');
+      assert.strictEqual(new Chord(new Note('B', { alteration: -1 }), [P1, M3, P5, M7]).toString(), 'Bbmaj7');
+    });
+
     describe('inversions', () => {
       test('first inversion', () => {
         assert.strictEqual(new Chord(C, [M3, P5, P1]).toString(), 'C/E');
+      });
+
+      test('altered bass keeps its accidental', () => {
+        assert.strictEqual(new Chord(Csharp, [m3, P5, P1]).toString(), 'C#m/E');
       });
 
       test('second inversion', () => {

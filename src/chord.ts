@@ -157,14 +157,14 @@ export class Chord {
 
   toString(): string {
     const quality = this.quality;
-    let result = this.root.pitchClass;
+    let result = this.root.toString(false);
 
     if (quality !== 'M') {
       result += quality ?? '(?)';
     }
 
     if (this.inversion > 0) {
-      result += '/' + this.root.transpose(this.intervals[0]!).pitchClass;
+      result += '/' + this.root.transpose(this.intervals[0]!).toString(false);
     }
 
     return result;
