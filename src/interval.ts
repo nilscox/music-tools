@@ -19,13 +19,9 @@ export class Interval {
 
     assert(number > 0, `Invalid interval number: ${number}`);
 
-    if ([1, 4, 5].includes(((number - 1) % 7) + 1)) {
-      assert(['P', 'A', 'AA', 'd', 'dd'].includes(quality), `Invalid interval quality: ${quality}`);
-    }
+    const qualities = Interval.isPerfect(number) ? ['P', 'A', 'AA', 'd', 'dd'] : ['M', 'm', 'A', 'AA', 'd', 'dd'];
 
-    if ([2, 3, 6, 7].includes(((number - 1) % 7) + 1)) {
-      assert(['M', 'm', 'A', 'AA', 'd', 'dd'].includes(quality), `Invalid interval quality: ${quality}`);
-    }
+    assert(qualities.includes(quality), `Invalid interval quality: ${quality}`);
 
     this.number = number;
     this.quality = quality;
@@ -84,46 +80,53 @@ export class Interval {
 
     const [quality, number] = map[semitones % 12]!;
 
-    return [quality, number + 12 * Math.floor(semitones / 12)];
+    // an octave adds 7 to the diatonic degree, not 12
+    return [quality, number + 7 * Math.floor(semitones / 12)];
   }
 
   private static fromNotes(a: Note, b: Note): [IntervalQuality, number] {
+    const pitchClasses = 'CDEFGAB';
+
     const octave = (b.octave ?? 4) - (a.octave ?? 4);
-    const number = 'CDEFGAB'.indexOf(b.pitchClass) - 'CDEFGAB'.indexOf(a.pitchClass) + 1 + 7 * octave;
+    const number = pitchClasses.indexOf(b.pitchClass) - pitchClasses.indexOf(a.pitchClass) + 1 + 7 * octave;
+    const descending = `Cannot compute a descending interval, from ${a} to ${b}`;
 
-    const getQuality = () => {
-      const interval = new Interval([1, 4, 5].includes(number % 7) ? 'P' : 'M', number);
-      const diff = (b.midi - a.transpose(interval).midi) % 12;
+    assert(number > 0, descending);
+    assert(b.midi >= a.midi, descending);
 
-      if (diff === 1) {
-        return 'A';
-      }
+    const perfect = Interval.isPerfect(number);
+    const delta = b.midi - a.midi - new Interval(perfect ? 'P' : 'M', number).semitones;
 
-      if (diff === -1) {
-        if (interval.quality === 'M') {
-          return 'm';
-        } else {
-          return 'd';
-        }
-      }
+    // how far the pair sits from the perfect or major interval of the same degree
+    const qualities: Record<number, IntervalQuality> = perfect
+      ? { '-2': 'dd', '-1': 'd', 0: 'P', 1: 'A', 2: 'AA' }
+      : { '-3': 'dd', '-2': 'd', '-1': 'm', 0: 'M', 1: 'A', 2: 'AA' };
 
-      assert(diff == 0);
+    const quality = qualities[delta];
 
-      return interval.quality;
-    };
+    assert(quality, `Interval from ${a} to ${b} is beyond doubly diminished or augmented`);
 
-    return [getQuality(), number];
+    return [quality, number];
   }
 
   static isQuality(value: string): value is IntervalQuality {
     return ['P', 'm', 'M', 'd', 'dd', 'A', 'AA'].includes(value);
   }
 
+  // the degree within a single octave: 8 -> 1, 9 -> 2, 15 -> 1
+  static degree(number: number): number {
+    return ((number - 1) % 7) + 1;
+  }
+
+  static isPerfect(number: number): boolean {
+    return [1, 4, 5].includes(Interval.degree(number));
+  }
+
   get semitones(): number {
-    const number = ((this.number - 1) % 7) + 1;
+    const number = Interval.degree(this.number);
     const octave = Math.floor((this.number - 1) / 7);
 
-    let semitones = {
+    const semitones = {
       1: 0,
       2: 2,
       3: 4,
@@ -136,14 +139,14 @@ export class Interval {
     assert(semitones !== undefined);
 
     // diminished sits one semitone below minor for imperfect intervals, one below perfect otherwise
-    const imperfect = [2, 3, 6, 7].includes(number);
+    const perfect = Interval.isPerfect(this.number);
 
     const offsets: Record<IntervalQuality, number> = {
       P: 0,
       M: 0,
       m: -1,
-      d: imperfect ? -2 : -1,
-      dd: imperfect ? -3 : -2,
+      d: perfect ? -1 : -2,
+      dd: perfect ? -2 : -3,
       A: 1,
       AA: 2,
     };
@@ -160,7 +163,7 @@ export class Interval {
   }
 
   simple() {
-    const number = ((this.number - 1) % 7) + 1;
+    const number = Interval.degree(this.number);
 
     // a simple interval spans at most one octave, included: whole octaves reduce to an 8th, not a unison
     if (number === 1 && this.number > 1) {

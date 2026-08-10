@@ -118,6 +118,101 @@ describe('Interval', () => {
         new Interval('M', 9),
       );
     });
+
+    describe('doubly altered', () => {
+      // prettier-ignore
+      const tests = new Map<[string, string], Interval>([
+        [['Cb', 'C#'], new Interval('AA', 1)],
+        [['Cb', 'D#'], new Interval('AA', 2)],
+        [['C#', 'Db'], new Interval('d', 2)],
+        [['D#', 'F'],  new Interval('d', 3)],
+        [['C#', 'Fb'], new Interval('dd', 4)],
+        [['C#', 'Gb'], new Interval('dd', 5)],
+        [['Cb', 'G#'], new Interval('AA', 5)],
+      ]);
+
+      for (const [[from, to], interval] of tests.entries()) {
+        test(`${from} to ${to} = ${interval}`, () => {
+          assert.deepStrictEqual(new Interval(new Note(from), new Note(to)), interval);
+        });
+      }
+    });
+
+    describe('descending', () => {
+      test('lower letter', () => {
+        assert.throws(() => new Interval(new Note('B'), new Note('C')), {
+          message: 'Cannot compute a descending interval, from B to C',
+        });
+      });
+
+      test('same letter, lower pitch', () => {
+        assert.throws(() => new Interval(new Note('C'), new Note('Cb')), {
+          message: 'Cannot compute a descending interval, from C to Cb',
+        });
+      });
+
+      test('same pitch, lower letter', () => {
+        assert.throws(() => new Interval(new Note('F'), new Note('E', { alteration: 1 })), {
+          message: 'Cannot compute a descending interval, from F to E#',
+        });
+      });
+    });
+
+    test('beyond doubly augmented', () => {
+      assert.throws(() => new Interval(new Note('Fb'), new Note('B#')), {
+        message: 'Interval from Fb to B# is beyond doubly diminished or augmented',
+      });
+    });
+
+    test('every ascending pair round trips through transpose', () => {
+      const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'].flatMap((pitchClass) =>
+        ['b', '', '#'].map((alteration) => new Note(`${pitchClass}${alteration}`)),
+      );
+
+      for (const a of notes) {
+        for (const b of notes) {
+          let interval: Interval;
+
+          try {
+            interval = new Interval(a, b);
+          } catch (error) {
+            // failing is allowed, failing without saying why is not
+            assert.match(
+              (error as Error).message,
+              /^(Cannot compute a descending interval|Interval from .* is beyond)/,
+              `${a} to ${b}`,
+            );
+            continue;
+          }
+
+          assert.ok(a.transpose(interval).equals(b), `${a} to ${b} gave ${interval}`);
+        }
+      }
+    });
+  });
+
+  describe('from semitones', () => {
+    // prettier-ignore
+    const tests = new Map<number, Interval>([
+      [0,  new Interval('P', 1)],
+      [11, new Interval('M', 7)],
+      [12, new Interval('P', 8)],
+      [13, new Interval('m', 9)],
+      [19, new Interval('P', 12)],
+      [24, new Interval('P', 15)],
+    ]);
+
+    for (const [semitones, interval] of tests.entries()) {
+      test(`${semitones} = ${interval}`, () => {
+        assert.deepStrictEqual(new Interval(semitones), interval);
+      });
+    }
+
+    test('round trips for 0 to 24 semitones', () => {
+      for (let semitones = 0; semitones <= 24; ++semitones) {
+        assert.strictEqual(new Interval(semitones).semitones, semitones, `${semitones} semitones`);
+      }
+    });
   });
 
   describe('from string', () => {

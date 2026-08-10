@@ -52,12 +52,18 @@ All three classes use the same idiom, and new classes should follow it:
   octave 4. `transpose` walks the letter names first and derives the alteration from the semitone
   difference, so enharmonic spelling is preserved (`Note('C').transpose(Interval('A4'))` is `F#`,
   not `Gb`).
-- **Interval** — quality + number, where the number can exceed 7 (compound intervals). Quality
-  validity depends on whether the simple number is perfect (1/4/5) or imperfect (2/3/6/7), and so
+- **Interval** — quality + number, where the number can exceed 7 (compound intervals). Numbers are
+  1-based diatonic degrees, so an octave adds **7**, not 12 — the trap `fromSemitones` fell into.
+  Quality validity depends on whether the degree is perfect (1/4/5) or imperfect (2/3/6/7), and so
   does the size of a diminished interval (one semitone below minor when imperfect, one below
-  perfect otherwise) — any such check must use the _reduced_ number, not `this.number`.
+  perfect otherwise). Every such check must go through `Interval.degree()` / `Interval.isPerfect()`
+  rather than testing `this.number` directly, which is only correct below an octave.
   A simple interval spans at most one octave **inclusive**, so `simple()` reduces whole octaves to
   an 8th rather than a unison: `P8` → `P8`, `P15` → `P8`, but `m9` → `m2`.
+  `new Interval(a, b)` is **ascending only**: it requires `b` to be at or above `a` both in letter
+  and in pitch, and throws a descending-interval error otherwise. It derives quality from the
+  semitone distance to the perfect/major interval of the same degree, which covers `dd`..`AA`;
+  anything wider (`Fb` to `B#`) is rejected with a message naming the notes.
 - **Chord** — a root `Note` plus an **ordered** `Interval[]`. Order encodes the inversion: rotating
   the array (`invert`) is the inversion, and `rootIndex`/`inversion` are derived from where `P1`
   sits. `quality` is a reverse lookup that only matches after `toRootPosition()`, so it returns
