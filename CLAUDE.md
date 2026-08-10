@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm test 'src/**/*.spec.ts'   # full suite (the `test` script takes no file args of its own)
 pnpm test src/chord.spec.ts    # single file
 pnpm test src/chord.spec.ts --test-name-pattern 'inversion'   # single test/suite by name
-pnpm build                     # vite build -> lib/ (ESM + rolled-up .d.ts + sourcemaps)
-npx tsc --noEmit               # typecheck only
+pnpm build                     # tsc -> lib/ (ESM + .d.ts + both sourcemap kinds)
+pnpm typecheck                 # tsc --noEmit
 npx prettier --write src        # format (config lives in package.json)
 ```
 

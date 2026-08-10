@@ -15,22 +15,23 @@
   },
   "repository": "github:nilscox/music-tools",
   "files": [
-    "lib"
+    "lib",
+    "src",
+    "!**/*.spec.*"
   ],
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "test": "node --experimental-strip-types --test --experimental-test-isolation=none",
-    "build": "vite build"
+    "build": "rm -rf lib && tsc",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@types/node": "^25.0.3",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.0",
-    "vite-plugin-dts": "^4.5.4"
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "^26.2.0",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2"
   },
   "prettier": {
     "printWidth": 120,
