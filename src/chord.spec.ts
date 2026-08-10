@@ -277,5 +277,13 @@ describe('Chord', () => {
         new Note('C', { octave: 4 }),
       ]);
     });
+
+    test('C/E with octave 0', () => {
+      assert.deepStrictEqual(new Chord(new Note('C', { octave: 0 }), [M3, P5, P1]).notes, [
+        new Note('E', { octave: -1 }),
+        new Note('G', { octave: -1 }),
+        new Note('C', { octave: 0 }),
+      ]);
+    });
   });
 });

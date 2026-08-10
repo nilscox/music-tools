@@ -207,7 +207,7 @@ export class Chord {
     return this.intervals.map((interval, index) => {
       const note = this.root.transpose(interval);
 
-      if (note.octave && index < rootIndex) {
+      if (note.octave !== undefined && index < rootIndex) {
         note.octave--;
       }
 
