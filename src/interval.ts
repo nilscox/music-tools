@@ -133,23 +133,20 @@ export class Interval {
 
     assert(semitones !== undefined);
 
-    if (this.quality === 'm') semitones -= 1;
+    // diminished sits one semitone below minor for imperfect intervals, one below perfect otherwise
+    const imperfect = [2, 3, 6, 7].includes(number);
 
-    if (this.quality === 'd') semitones -= 1;
-    if (this.quality === 'dd') semitones -= 2;
+    const offsets: Record<IntervalQuality, number> = {
+      P: 0,
+      M: 0,
+      m: -1,
+      d: imperfect ? -2 : -1,
+      dd: imperfect ? -3 : -2,
+      A: 1,
+      AA: 2,
+    };
 
-    if (this.quality === 'A') semitones += 1;
-    if (this.quality === 'AA') semitones += 2;
-
-    if ([2, 3, 6, 7].includes(this.number)) {
-      if (this.quality === 'dd' || this.quality === 'd') {
-        semitones -= 1;
-      }
-    }
-
-    semitones += 12 * octave;
-
-    return semitones;
+    return semitones + offsets[this.quality] + 12 * octave;
   }
 
   equals(other?: unknown) {

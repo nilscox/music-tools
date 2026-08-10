@@ -241,8 +241,12 @@ describe('Interval', () => {
         [new Interval('m', 9), 13],
         [new Interval('M', 9), 14],
         [new Interval('m', 10), 15],
+        [new Interval('d', 10), 14],
+        [new Interval('d', 13), 19],
+        [new Interval('dd', 10), 13],
         [new Interval('P', 15), 24],
         [new Interval('m', 16), 25],
+        [new Interval('d', 17), 26],
       ]);
 
       for (const [interval, semitones] of tests.entries()) {
