@@ -96,10 +96,10 @@ export class Note {
     return `${this.pitchClass}${alteration}${octave}`;
   }
 
-  with(attributes: { pitchClass?: PitchClass; alteration?: number; octave?: number }): Note {
+  with(attributes: { pitchClass?: PitchClass; alteration?: number; octave?: number | null }): Note {
     return new Note(attributes.pitchClass ?? this.pitchClass, {
       alteration: attributes.alteration ?? this.alteration,
-      octave: attributes.octave ?? this.octave,
+      octave: attributes.octave === null ? undefined : (attributes.octave ?? this.octave),
     });
   }
 

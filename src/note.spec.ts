@@ -210,6 +210,15 @@ describe('Note', () => {
       assert.deepStrictEqual(new Note('C#4').with({ pitchClass: 'D' }), new Note('D#4'));
     });
 
+    test('clears the octave with null', () => {
+      assert.deepStrictEqual(new Note('C#4').with({ octave: null }), new Note('C#'));
+      assert.deepStrictEqual(new Note('C#').with({ octave: null }), new Note('C#'));
+    });
+
+    test('keeps the octave when it is not provided', () => {
+      assert.deepStrictEqual(new Note('C4').with({ octave: undefined }), new Note('C4'));
+    });
+
     test('validates the result', () => {
       assert.throws(() => new Note('C4').with({ alteration: 3 }));
     });
