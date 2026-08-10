@@ -276,9 +276,13 @@ describe('Interval', () => {
       assert.deepEqual(new Interval('m', 9).simple(), new Interval('m', 2));
       assert.deepEqual(new Interval('M', 9).simple(), new Interval('M', 2));
       assert.deepEqual(new Interval('P', 11).simple(), new Interval('P', 4));
-      assert.deepEqual(new Interval('P', 15).simple(), new Interval('P', 1));
       assert.deepEqual(new Interval('m', 16).simple(), new Interval('m', 2));
-      assert.deepEqual(new Interval('P', 22).simple(), new Interval('P', 1));
+    });
+
+    test('whole octaves', () => {
+      assert.deepEqual(new Interval('P', 15).simple(), new Interval('P', 8));
+      assert.deepEqual(new Interval('P', 22).simple(), new Interval('P', 8));
+      assert.deepEqual(new Interval('P', 15).invert(), new Interval('P', 1));
     });
   });
 

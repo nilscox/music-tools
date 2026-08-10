@@ -93,8 +93,10 @@ export class Chord {
   }
 
   private static get intervalRegExp() {
+    // longest first, so that alternation matches 'm7' rather than 'm' without relying on backtracking
     const qualities = [...Object.keys(this.chordsRef), ...Object.keys(this.aliases)]
       .filter((key) => key !== '')
+      .sort((a, b) => b.length - a.length)
       .join('|')
       .replaceAll(/([+\(\)])/g, '\\$1');
 

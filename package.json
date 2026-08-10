@@ -18,7 +18,7 @@
     "lib"
   ],
   "engines": {
-    "node": "25"
+    "node": ">=24"
   },
   "scripts": {
     "test": "node --experimental-strip-types --test --experimental-test-isolation=none",

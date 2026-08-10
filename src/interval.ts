@@ -162,7 +162,12 @@ export class Interval {
   simple() {
     const number = ((this.number - 1) % 7) + 1;
 
-    return new Interval(this.quality, this.number === 8 ? 8 : number);
+    // a simple interval spans at most one octave, included: whole octaves reduce to an 8th, not a unison
+    if (number === 1 && this.number > 1) {
+      return new Interval(this.quality, 8);
+    }
+
+    return new Interval(this.quality, number);
   }
 
   invert() {

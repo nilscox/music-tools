@@ -13,7 +13,7 @@ npx tsc --noEmit               # typecheck only
 npx prettier --write src        # format (config lives in package.json)
 ```
 
-Requires Node 25 — tests run TypeScript directly via `--experimental-strip-types`, with
+Requires Node >= 24 — tests run TypeScript directly via `--experimental-strip-types`, with
 `--experimental-test-isolation=none` (all spec files share one process).
 
 There is no lint script; Prettier (120 cols, single quotes, `@trivago` import sorting) is the only
@@ -21,8 +21,14 @@ style tooling.
 
 ## Architecture
 
-A published library (`@nilscox/music-tools`) of three immutable-ish music theory value classes.
+A published library (`@nilscox/music-tools`) of three music theory value classes.
 `src/index.ts` re-exports all of them; `src/utils.ts` holds only `assert`.
+
+All three are **deeply immutable**: fields are `readonly` and every constructor ends with
+`Object.freeze(this)` (`Chord` also freezes its copy of the intervals array). Nothing mutates an
+instance in place — derive new ones with `Note.with({...})` or by constructing. Because freezing
+routes every change back through a constructor, the invariants below can't be bypassed after
+creation.
 
 The dependency direction is **Chord → Interval ⇄ Note**. `Note` and `Interval` are mutually
 recursive: `Note.transpose` consumes an `Interval`, and `Interval.fromNotes` calls
@@ -41,14 +47,17 @@ All three classes use the same idiom, and new classes should follow it:
 
 ### Domain invariants worth knowing
 
-- **Note** — pitch class + alteration (−2..2) + *optional* octave (−1..9). An absent octave means
+- **Note** — pitch class + alteration (−2..2) + _optional_ octave (−1..9). An absent octave means
   "pitch class only": `equals` compares pitch class and alteration, and `midi` falls back to
   octave 4. `transpose` walks the letter names first and derives the alteration from the semitone
   difference, so enharmonic spelling is preserved (`Note('C').transpose(Interval('A4'))` is `F#`,
   not `Gb`).
 - **Interval** — quality + number, where the number can exceed 7 (compound intervals). Quality
-  validity depends on whether the simple number is perfect (1/4/5) or imperfect (2/3/6/7);
-  `semitones` and `invert` both fold compounds back through `simple()`.
+  validity depends on whether the simple number is perfect (1/4/5) or imperfect (2/3/6/7), and so
+  does the size of a diminished interval (one semitone below minor when imperfect, one below
+  perfect otherwise) — any such check must use the _reduced_ number, not `this.number`.
+  A simple interval spans at most one octave **inclusive**, so `simple()` reduces whole octaves to
+  an 8th rather than a unison: `P8` → `P8`, `P15` → `P8`, but `m9` → `m2`.
 - **Chord** — a root `Note` plus an **ordered** `Interval[]`. Order encodes the inversion: rotating
   the array (`invert`) is the inversion, and `rootIndex`/`inversion` are derived from where `P1`
   sits. `quality` is a reverse lookup that only matches after `toRootPosition()`, so it returns
@@ -57,11 +66,8 @@ All three classes use the same idiom, and new classes should follow it:
 Chord qualities live in a `chordsRef` literal at the top of `src/chord.ts` (kept `// prettier-ignore`
 for alignment) and are parsed into `Interval` objects once in a private static. `Chord.aliases` maps
 symbols (`°`, `+`, `ø`, `sus`, `''`) onto canonical qualities, and the chord-name regex is generated
-from both tables — adding a quality to `chordsRef` automatically extends string parsing, including
-slash-chord (`C/E`) support.
-
-Note: `src/chords.json` duplicates the `chordsRef` table but is imported by nothing. Edit
-`src/chord.ts`; the JSON file is dead weight unless you deliberately wire it up.
+from both tables, sorted longest-first so alternation matches `m7` before `m` — adding a quality to
+`chordsRef` automatically extends string parsing, including slash-chord (`C/E`) support.
 
 ## TypeScript constraints
 

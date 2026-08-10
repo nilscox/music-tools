@@ -103,7 +103,11 @@ export class Note {
     });
   }
 
-  equals(other: Note) {
+  equals(other?: unknown) {
+    if (!(other instanceof Note)) {
+      return false;
+    }
+
     if (this.octave === undefined || other.octave === undefined) {
       return this.pitchClass === other.pitchClass && this.alteration === other.alteration;
     }
