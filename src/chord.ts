@@ -25,8 +25,8 @@ const chordsRef = {
 export type ChordQuality = keyof typeof chordsRef;
 
 export class Chord {
-  public root: Note;
-  public intervals: Interval[];
+  public readonly root: Note;
+  public readonly intervals: readonly Interval[];
 
   private static chordsRef = Object.entries(chordsRef).reduce(
     (obj, [name, intervals]) => ({
@@ -62,7 +62,9 @@ export class Chord {
     );
 
     this.root = root;
-    this.intervals = intervals;
+    this.intervals = Object.freeze(intervals.slice());
+
+    Object.freeze(this);
   }
 
   private static from(
@@ -71,14 +73,14 @@ export class Chord {
       | [root: Note, quality: ChordQuality]
       | [root: Note, intervals: Interval[]]
       | [name: string, options?: { octave?: number }],
-  ): [Note, Interval[]] {
+  ): [Note, readonly Interval[]] {
     if (args[0] instanceof Chord) {
       return [args[0].root, args[0].intervals];
     }
 
     if (args[0] instanceof Note) {
       if (typeof args[1] === 'string' && Chord.isQuality(args[1])) {
-        return [args[0], this.chordsRef[args[1]]!.slice()];
+        return [args[0], this.chordsRef[args[1]]!];
       }
 
       return args as [Note, Interval[]];
@@ -107,12 +109,9 @@ export class Chord {
     assert(match, `Invalid chord name ${name}`);
     assert(match.groups?.['root']);
 
-    const root = new Note(match.groups['root']);
+    const parsed = new Note(match.groups['root']);
+    const root = octave !== undefined ? parsed.with({ octave }) : parsed;
     const base = match.groups['base'] ? new Note(match.groups['base']) : null;
-
-    if (octave !== undefined) {
-      root.octave = octave;
-    }
 
     let quality = match.groups['quality'] ?? '';
 
@@ -208,7 +207,7 @@ export class Chord {
       const note = this.root.transpose(interval);
 
       if (note.octave !== undefined && index < rootIndex) {
-        note.octave--;
+        return note.with({ octave: note.octave - 1 });
       }
 
       return note;

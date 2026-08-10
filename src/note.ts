@@ -6,9 +6,9 @@ export type PitchClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 type NoteAttributes = [PitchClass, { alteration?: number; octave?: number }?];
 
 export class Note {
-  public pitchClass: PitchClass;
-  public alteration: number;
-  public octave?: number;
+  public readonly pitchClass: PitchClass;
+  public readonly alteration: number;
+  public readonly octave?: number;
 
   constructor(value: string);
   constructor(value: number);
@@ -30,6 +30,8 @@ export class Note {
     this.pitchClass = pitchClass;
     this.alteration = alteration;
     this.octave = octave;
+
+    Object.freeze(this);
   }
 
   private static from(args: [string] | [number] | [Note] | NoteAttributes): NoteAttributes {
@@ -89,9 +91,16 @@ export class Note {
 
   toString(withOctave = true): string {
     const alteration = { '-2': 'bb', '-1': 'b', '0': '', '1': '#', '2': '##' }[this.alteration];
-    const octave = withOctave ? this.octave ?? '' : '';
+    const octave = withOctave ? (this.octave ?? '') : '';
 
     return `${this.pitchClass}${alteration}${octave}`;
+  }
+
+  with(attributes: { pitchClass?: PitchClass; alteration?: number; octave?: number }): Note {
+    return new Note(attributes.pitchClass ?? this.pitchClass, {
+      alteration: attributes.alteration ?? this.alteration,
+      octave: attributes.octave ?? this.octave,
+    });
   }
 
   equals(other: Note) {
@@ -115,19 +124,12 @@ export class Note {
 
     assert(pitchClass && Note.isPitchClass(pitchClass));
 
-    const note = new Note(pitchClass, {
-      alteration: 0,
-      octave: Math.floor(pitchClassIndex / pitchClasses.length),
+    const octave = Math.floor(pitchClassIndex / pitchClasses.length);
+    const natural = new Note(pitchClass, { alteration: 0, octave });
+
+    return new Note(pitchClass, {
+      alteration: interval.semitones - (natural.midi - self.midi),
+      octave: this.octave === undefined ? undefined : octave + this.octave,
     });
-
-    note.alteration = interval.semitones - (note.midi - self.midi);
-
-    if (this.octave === undefined) {
-      note.octave = undefined;
-    } else {
-      note.octave! += this.octave;
-    }
-
-    return note;
   }
 }

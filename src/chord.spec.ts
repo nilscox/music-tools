@@ -286,4 +286,29 @@ describe('Chord', () => {
       ]);
     });
   });
+
+  describe('immutability', () => {
+    test('properties cannot be reassigned', () => {
+      const chord = new Chord(C, [P1, M3, P5]);
+
+      assert.throws(() => Object.assign(chord, { root: D }), TypeError);
+      assert.strictEqual(chord.toString(), 'C');
+    });
+
+    test('intervals cannot be mutated in place', () => {
+      const chord = new Chord(C, [P1, M3, P5]);
+
+      assert.throws(() => (chord.intervals as Interval[]).push(m3), TypeError);
+      assert.strictEqual(chord.intervals.length, 3);
+    });
+
+    test('the intervals passed to the constructor are copied', () => {
+      const intervals = [P1, M3, P5];
+      const chord = new Chord(C, intervals);
+
+      intervals.push(m3);
+
+      assert.strictEqual(chord.intervals.length, 3);
+    });
+  });
 });

@@ -171,7 +171,7 @@ describe('Note', () => {
     test('B3 m2', () => {
       assert.deepStrictEqual(
         new Note('B', { octave: 3 }).transpose(new Interval('m', 2)),
-        new Note('C', { octave: 4 })
+        new Note('C', { octave: 4 }),
       );
     });
 
@@ -182,15 +182,36 @@ describe('Note', () => {
     test('C P8 with octave', () => {
       assert.deepStrictEqual(
         new Note('C', { octave: 4 }).transpose(new Interval('P', 8)),
-        new Note('C', { octave: 5 })
+        new Note('C', { octave: 5 }),
       );
     });
 
     test('C m9 with octave', () => {
       assert.deepStrictEqual(
         new Note('C', { octave: 4 }).transpose(new Interval('m', 9)),
-        new Note('D', { octave: 5, alteration: -1 })
+        new Note('D', { octave: 5, alteration: -1 }),
       );
+    });
+  });
+
+  describe('immutability', () => {
+    test('properties cannot be reassigned', () => {
+      const note = new Note('C');
+
+      assert.throws(() => Object.assign(note, { alteration: 99 }), TypeError);
+      assert.strictEqual(note.toString(), 'C');
+    });
+  });
+
+  describe('with', () => {
+    test('overrides a single attribute', () => {
+      assert.deepStrictEqual(new Note('C4').with({ alteration: 1 }), new Note('C#4'));
+      assert.deepStrictEqual(new Note('C4').with({ octave: 5 }), new Note('C5'));
+      assert.deepStrictEqual(new Note('C#4').with({ pitchClass: 'D' }), new Note('D#4'));
+    });
+
+    test('validates the result', () => {
+      assert.throws(() => new Note('C4').with({ alteration: 3 }));
     });
   });
 });

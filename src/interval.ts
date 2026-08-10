@@ -4,8 +4,8 @@ import { assert } from './utils.ts';
 export type IntervalQuality = 'P' | 'm' | 'M' | 'd' | 'dd' | 'A' | 'AA';
 
 export class Interval {
-  public number: number;
-  public quality: IntervalQuality;
+  public readonly number: number;
+  public readonly quality: IntervalQuality;
 
   constructor(quality: IntervalQuality, number: number);
 
@@ -29,6 +29,8 @@ export class Interval {
 
     this.number = number;
     this.quality = quality;
+
+    Object.freeze(this);
   }
 
   private static from(
