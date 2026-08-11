@@ -125,6 +125,16 @@ describe('Chord', () => {
     });
   });
 
+  describe('validation', () => {
+    test('invalid quality', () => {
+      assert.throws(() => new Chord(C, 'sus9' as never), { message: 'Invalid chord quality sus9' });
+    });
+
+    test('invalid intervals', () => {
+      assert.throws(() => new Chord(C, ['P1', 'M3', 'P5'] as never), { message: 'Invalid chord intervals' });
+    });
+  });
+
   describe('toString', () => {
     test('major', () => {
       assert.strictEqual(new Chord(C, [P1, M3, P5]).toString(), 'C');

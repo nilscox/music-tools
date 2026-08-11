@@ -79,9 +79,15 @@ export class Chord {
     }
 
     if (args[0] instanceof Note) {
-      if (typeof args[1] === 'string' && Chord.isQuality(args[1])) {
+      if (typeof args[1] === 'string') {
+        assert(Chord.isQuality(args[1]), `Invalid chord quality ${args[1]}`);
         return [args[0], this.chordsRef[args[1]]!];
       }
+
+      assert(
+        Array.isArray(args[1]) && args[1].every((interval) => interval instanceof Interval),
+        'Invalid chord intervals',
+      );
 
       return args as [Note, Interval[]];
     }

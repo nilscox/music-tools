@@ -63,6 +63,8 @@ export class Interval {
   }
 
   private static fromSemitones(semitones: number): [IntervalQuality, number] {
+    assert(Number.isInteger(semitones) && semitones >= 0, `Invalid interval semitones: ${semitones}`);
+
     const map: Record<string, [IntervalQuality, number]> = {
       0: ['P', 1],
       1: ['m', 2],

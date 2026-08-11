@@ -20,6 +20,11 @@ describe('Interval', () => {
       assert.throws(() => new Interval('P', 0), { message: 'Invalid interval number: 0' });
     });
 
+    test('invalid semitones', () => {
+      assert.throws(() => new Interval(-3), { message: 'Invalid interval semitones: -3' });
+      assert.throws(() => new Interval(1.5), { message: 'Invalid interval semitones: 1.5' });
+    });
+
     describe('perfect quality', () => {
       const valid = [1, 4, 5, 8, 11, 12, 15];
 
