@@ -259,6 +259,42 @@ describe('Interval', () => {
     });
   });
 
+  describe('parse', () => {
+    test('takes a plain string', () => {
+      const value: string = 'm3';
+
+      assert.deepStrictEqual(Interval.parse(value), new Interval('m', 3));
+    });
+
+    test('compound', () => {
+      assert.deepStrictEqual(Interval.parse('M13'), new Interval('M', 13));
+    });
+
+    test('round-trips toString', () => {
+      for (const quality of ['P', 'm', 'M', 'd', 'dd', 'A', 'AA'] as IntervalQuality[]) {
+        for (const number of [1, 2, 4, 7, 8, 11]) {
+          const perfect = quality === 'P';
+          const imperfect = quality === 'M' || quality === 'm';
+
+          if ((perfect || imperfect) && Interval.isPerfect(number) !== perfect) {
+            continue;
+          }
+
+          const interval = new Interval(quality, number);
+
+          assert.deepStrictEqual(Interval.parse(interval.toString()), interval);
+        }
+      }
+    });
+
+    test('rejects what the constructor rejects', () => {
+      assert.throws(() => Interval.parse('third'), { message: 'Invalid interval: third' });
+      assert.throws(() => Interval.parse('X3'), { message: 'Invalid interval: X3' });
+      assert.throws(() => Interval.parse(''), { message: 'Invalid interval: ' });
+      assert.throws(() => Interval.parse('M4'), { message: 'Invalid interval quality: M' });
+    });
+  });
+
   describe('toString', () => {
     const tests: Array<[IntervalQuality, number]> = [
       ['P', 1],

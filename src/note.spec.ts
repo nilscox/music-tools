@@ -194,6 +194,131 @@ describe('Note', () => {
     });
   });
 
+  describe('transpose down', () => {
+    test('C P1', () => {
+      assert.deepStrictEqual(new Note('C').transpose(new Interval('P', 1), 'down'), new Note('C'));
+    });
+
+    test('C m3', () => {
+      assert.deepStrictEqual(new Note('C').transpose(new Interval('m', 3), 'down'), new Note('A'));
+    });
+
+    test('C M3', () => {
+      assert.deepStrictEqual(new Note('C').transpose(new Interval('M', 3), 'down'), new Note('Ab'));
+    });
+
+    test('G m3', () => {
+      assert.deepStrictEqual(new Note('G').transpose(new Interval('m', 3), 'down'), new Note('E'));
+    });
+
+    test('E A4', () => {
+      assert.deepStrictEqual(new Note('E').transpose(new Interval('A', 4), 'down'), new Note('Bb'));
+    });
+
+    test('Bb d5', () => {
+      assert.deepStrictEqual(new Note('Bb').transpose(new Interval('d', 5), 'down'), new Note('E'));
+    });
+
+    test('F# M7', () => {
+      assert.deepStrictEqual(new Note('F#').transpose(new Interval('M', 7), 'down'), new Note('G'));
+    });
+
+    test('C4 m2', () => {
+      assert.deepStrictEqual(new Note('C4').transpose(new Interval('m', 2), 'down'), new Note('B3'));
+    });
+
+    test('E4 A4', () => {
+      assert.deepStrictEqual(new Note('E4').transpose(new Interval('A', 4), 'down'), new Note('Bb3'));
+    });
+
+    test('C4 P8', () => {
+      assert.deepStrictEqual(new Note('C4').transpose(new Interval('P', 8), 'down'), new Note('C3'));
+    });
+
+    test('C4 m9', () => {
+      assert.deepStrictEqual(new Note('C4').transpose(new Interval('m', 9), 'down'), new Note('B2'));
+    });
+
+    test('C P8 without octave', () => {
+      assert.deepStrictEqual(new Note('C').transpose(new Interval('P', 8), 'down'), new Note('C'));
+    });
+
+    test('undoes an ascending transposition', () => {
+      const intervals = ['P1', 'm2', 'M3', 'P4', 'A4', 'd5', 'P5', 'm7', 'P8', 'm9'];
+
+      for (const value of intervals) {
+        const interval = Interval.parse(value);
+
+        for (const note of ['C4', 'F#4', 'Bb4', 'E4']) {
+          const start = new Note(note);
+
+          assert.deepStrictEqual(start.transpose(interval).transpose(interval, 'down'), start, `${note} ${value}`);
+          assert.deepStrictEqual(start.transpose(interval, 'down').transpose(interval), start, `${note} ${value}`);
+        }
+      }
+    });
+
+    test('is the descending interval it is named by', () => {
+      const intervals = ['m2', 'M3', 'P4', 'A4', 'P5', 'M6', 'm7', 'P8'];
+
+      for (const value of intervals) {
+        const interval = Interval.parse(value);
+        const below = new Note('C5').transpose(interval, 'down');
+
+        assert.deepStrictEqual(new Interval(below, new Note('C5')), interval, value);
+      }
+    });
+
+    test('an unknown direction', () => {
+      assert.throws(() => new Note('C').transpose(new Interval('M', 3), 'sideways' as never), {
+        message: 'Invalid transpose direction sideways',
+      });
+    });
+
+    test('below the lowest octave', () => {
+      assert.throws(() => new Note('C-1').transpose(new Interval('P', 8), 'down'), {
+        message: 'Invalid note octave -2',
+      });
+    });
+  });
+
+  describe('isEnharmonic', () => {
+    test('same pitch, different spelling', () => {
+      assert.ok(new Note('C#').isEnharmonic(new Note('Db')));
+      assert.ok(new Note('Db').isEnharmonic(new Note('C#')));
+      assert.ok(new Note('E#').isEnharmonic(new Note('F')));
+      assert.ok(new Note('Fb').isEnharmonic(new Note('E')));
+      assert.ok(new Note('D').isEnharmonic(new Note('Ebb')));
+    });
+
+    test('across the octave boundary, without a register', () => {
+      assert.ok(new Note('B#').isEnharmonic(new Note('C')));
+      assert.ok(new Note('Cb').isEnharmonic(new Note('B')));
+    });
+
+    test('across the octave boundary, with one', () => {
+      assert.ok(new Note('B#3').isEnharmonic(new Note('C4')));
+      assert.ok(!new Note('B#4').isEnharmonic(new Note('C4')));
+    });
+
+    test('the same spelling never is', () => {
+      assert.ok(!new Note('C#').isEnharmonic(new Note('C#')));
+      assert.ok(!new Note('C#4').isEnharmonic(new Note('C#4')));
+      assert.ok(!new Note('C#4').isEnharmonic(new Note('C#5')));
+    });
+
+    test('a different pitch never is', () => {
+      assert.ok(!new Note('C').isEnharmonic(new Note('D')));
+      assert.ok(!new Note('C#').isEnharmonic(new Note('D#')));
+      assert.ok(!new Note('C4').isEnharmonic(new Note('Db5')));
+    });
+
+    test('anything else never is', () => {
+      assert.ok(!new Note('C').isEnharmonic(undefined));
+      assert.ok(!new Note('C').isEnharmonic('C'));
+    });
+  });
+
   describe('immutability', () => {
     test('properties cannot be reassigned', () => {
       const note = new Note('C');

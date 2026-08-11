@@ -3,6 +3,8 @@ import { assert } from './utils.ts';
 
 export type PitchClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
+export type TransposeDirection = 'up' | 'down';
+
 type NoteAttributes = [PitchClass, { alteration?: number; octave?: number }?];
 
 export class Note {
@@ -115,24 +117,45 @@ export class Note {
     return other.midi === this.midi;
   }
 
-  transpose(interval: Interval) {
+  isEnharmonic(other?: unknown): boolean {
+    if (!(other instanceof Note)) {
+      return false;
+    }
+
+    if (this.pitchClass === other.pitchClass && this.alteration === other.alteration) {
+      return false;
+    }
+
+    if (this.octave === undefined || other.octave === undefined) {
+      return (((this.midi - other.midi) % 12) + 12) % 12 === 0;
+    }
+
+    return this.midi === other.midi;
+  }
+
+  transpose(interval: Interval, direction: TransposeDirection = 'up'): Note {
+    assert(direction === 'up' || direction === 'down', `Invalid transpose direction ${direction}`);
+
     const pitchClasses = 'CDEFGAB';
+    const sign = direction === 'up' ? 1 : -1;
 
     const self = new Note(this.pitchClass, {
       alteration: this.alteration,
       octave: 0,
     });
 
-    const pitchClassIndex = pitchClasses.indexOf(this.pitchClass) + (interval.number - 1);
-    const pitchClass = pitchClasses.at(pitchClassIndex % pitchClasses.length);
+    const pitchClassIndex = pitchClasses.indexOf(this.pitchClass) + sign * (interval.number - 1);
+
+    const octave = Math.floor(pitchClassIndex / pitchClasses.length);
+    const pitchClass = pitchClasses.at(pitchClassIndex - octave * pitchClasses.length);
 
     assert(pitchClass && Note.isPitchClass(pitchClass));
 
-    const octave = Math.floor(pitchClassIndex / pitchClasses.length);
-    const natural = new Note(pitchClass, { alteration: 0, octave });
+    const naturalMidi = new Note(pitchClass, { alteration: 0, octave: 0 }).midi + 12 * octave;
+    const targetMidi = self.midi + sign * interval.semitones;
 
     return new Note(pitchClass, {
-      alteration: interval.semitones - (natural.midi - self.midi),
+      alteration: targetMidi - naturalMidi,
       octave: this.octave === undefined ? undefined : octave + this.octave,
     });
   }

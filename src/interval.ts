@@ -53,7 +53,7 @@ export class Interval {
     return this.fromNotes(args[0], args[1]);
   }
 
-  private static fromString(value: `${IntervalQuality}${number}`): [IntervalQuality, number] {
+  private static fromString(value: string): [IntervalQuality, number] {
     const match = /^(P|M|m|A|AA|d|dd)(\d+)$/.exec(value);
 
     assert(match, `Invalid interval: ${value}`);
@@ -109,6 +109,12 @@ export class Interval {
     assert(quality, `Interval from ${a} to ${b} is beyond doubly diminished or augmented`);
 
     return [quality, number];
+  }
+
+  static parse(value: string): Interval {
+    const [quality, number] = Interval.fromString(value);
+
+    return new Interval(quality, number);
   }
 
   static isQuality(value: string): value is IntervalQuality {
