@@ -2,7 +2,7 @@ import { Interval, type IntervalQuality } from './interval.ts';
 import { Note } from './note.ts';
 import { assert } from './utils.ts';
 
-// prettier-ignore
+// oxfmt-ignore
 const chordsRef = {
   'M':        ['P1', 'M3', 'P5'],
   'm':        ['P1', 'm3', 'P5'],
@@ -96,9 +96,9 @@ export class Chord {
     // longest first, so that alternation matches 'm7' rather than 'm' without relying on backtracking
     const qualities = [...Object.keys(this.chordsRef), ...Object.keys(this.aliases)]
       .filter((key) => key !== '')
-      .sort((a, b) => b.length - a.length)
+      .toSorted((a, b) => b.length - a.length)
       .join('|')
-      .replaceAll(/([+\(\)])/g, '\\$1');
+      .replaceAll(/([+()])/g, '\\$1');
 
     const note = '[A-G](bb|b|#|##)?';
 

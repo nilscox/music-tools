@@ -1,8 +1,13 @@
 {
   "name": "@nilscox/music-tools",
-  "description": "Utilities for music stuff",
   "version": "1.1.0",
-  "packageManager": "pnpm@10.15.0",
+  "description": "Utilities for music stuff",
+  "repository": "github:nilscox/music-tools",
+  "files": [
+    "lib",
+    "src",
+    "!**/*.spec.*"
+  ],
   "type": "module",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -14,38 +19,22 @@
     },
     "./package.json": "./package.json"
   },
-  "repository": "github:nilscox/music-tools",
-  "files": [
-    "lib",
-    "src",
-    "!**/*.spec.*"
-  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --test --experimental-test-isolation=none 'src/**/*.spec.ts'",
+    "build": "rm -rf lib && tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "oxfmt": "^0.63.0",
+    "oxlint": "^1.78.0",
+    "typescript": "^7.0.2"
+  },
   "engines": {
     "node": ">=24"
   },
-  "scripts": {
-    "test": "node --experimental-strip-types --test --experimental-test-isolation=none",
-    "build": "rm -rf lib && tsc",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "@types/node": "^26.2.0",
-    "prettier": "^3.9.6",
-    "typescript": "^7.0.2"
-  },
-  "prettier": {
-    "printWidth": 120,
-    "singleQuote": true,
-    "plugins": [
-      "@trivago/prettier-plugin-sort-imports"
-    ],
-    "importOrder": [
-      "<THIRD_PARTY_MODULES>",
-      "^src/",
-      "^\\."
-    ],
-    "importOrderSeparation": true,
-    "importOrderSideEffects": false
-  }
+  "packageManager": "pnpm@10.15.0"
 }

@@ -5,19 +5,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm test 'src/**/*.spec.ts'   # full suite (the `test` script takes no file args of its own)
-pnpm test src/chord.spec.ts    # single file
-pnpm test src/chord.spec.ts --test-name-pattern 'inversion'   # single test/suite by name
+pnpm test                      # full suite (the script carries its own 'src/**/*.spec.ts' glob)
 pnpm build                     # tsc -> lib/ (ESM + .d.ts + both sourcemap kinds)
 pnpm typecheck                 # tsc --noEmit
-npx prettier --write src        # format (config lives in package.json)
+pnpm lint                      # oxlint
+pnpm format                    # oxfmt (--check in CI, via `pnpm format:check`)
+```
+
+A single file, or a single test by name, is run by invoking the test runner directly, since the
+`test` script's own glob would otherwise be added to whatever is passed:
+
+```bash
+node --experimental-strip-types --test src/chord.spec.ts
+node --experimental-strip-types --test src/chord.spec.ts --test-name-pattern 'inversion'
 ```
 
 Requires Node >= 24 — tests run TypeScript directly via `--experimental-strip-types`, with
 `--experimental-test-isolation=none` (all spec files share one process).
 
-There is no lint script; Prettier (120 cols, single quotes, `@trivago` import sorting) is the only
-style tooling.
+Style tooling is oxlint and oxfmt (120 cols, single quotes, import sorting), configured in
+`oxlint.config.ts` and `oxfmt.config.ts`. The package keeps its own configuration rather than
+inheriting one: it is a standalone repository, vendored into consumers as a subtree. Both tools
+read `.gitignore`, so neither needs to be told about `lib/`; `oxfmt .` also covers the JSON and
+Markdown at the root.
 
 ## Architecture
 
@@ -69,7 +79,7 @@ All three classes use the same idiom, and new classes should follow it:
   sits. `quality` is a reverse lookup that only matches after `toRootPosition()`, so it returns
   `undefined` for any interval set not in the table.
 
-Chord qualities live in a `chordsRef` literal at the top of `src/chord.ts` (kept `// prettier-ignore`
+Chord qualities live in a `chordsRef` literal at the top of `src/chord.ts` (kept `// oxfmt-ignore`
 for alignment) and are parsed into `Interval` objects once in a private static. `Chord.aliases` maps
 symbols (`°`, `+`, `ø`, `sus`, `''`) onto canonical qualities, and the chord-name regex is generated
 from both tables, sorted longest-first so alternation matches `m7` before `m` — adding a quality to
